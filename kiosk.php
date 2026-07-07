@@ -2,10 +2,34 @@
 require 'config.php';
 require 'helpers.php';
 
-$device = (int)($_GET['device'] ?? 0);
-if ($device < 1 || $device > 3) {
-    $device = 1; // fallback so the page never shows blank if the link is wrong
+$device_id = (int)($_GET['device'] ?? 0);
+
+$stmt = $pdo->prepare("SELECT * FROM devices WHERE id = ? AND active = 1");
+$stmt->execute([$device_id]);
+$device = $stmt->fetch();
+
+if (!$device) {
+    // Unknown or deactivated device id — show a clear message instead of a broken form.
+    ?>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Device not set up</title>
+    <link rel="stylesheet" href="style.css">
+    </head>
+    <body class="kiosk-body">
+        <div class="kiosk-thanks">
+            <h1>This station isn't set up yet</h1>
+            <p>Ask an admin to add this device in <code>devices.php</code>, or check the link's <code>?device=</code> number.</p>
+        </div>
+    </body>
+    </html>
+    <?php
+    exit;
 }
+
 $thanks = isset($_GET['thanks']);
 ?>
 <!DOCTYPE html>
@@ -26,18 +50,18 @@ $thanks = isset($_GET['thanks']);
     </div>
     <script>
         setTimeout(function () {
-            window.location.href = 'kiosk.php?device=<?= $device ?>';
+            window.location.href = 'kiosk.php?device=<?= (int)$device['id'] ?>';
         }, 3500);
     </script>
 <?php else: ?>
 
     <div class="kiosk-wrap">
-        <div class="kiosk-badge">Station <?= $device ?></div>
+        <div class="kiosk-badge"><?= e($device['name']) ?></div>
         <h1 class="kiosk-title">How was our service today?</h1>
         <p class="kiosk-sub">Tap to rate — takes 10 seconds</p>
 
         <form id="kioskForm" action="submit_response.php" method="post">
-            <input type="hidden" name="device_id" value="<?= $device ?>">
+            <input type="hidden" name="device_id" value="<?= (int)$device['id'] ?>">
             <input type="hidden" name="overall_stars" id="overall_stars" value="0">
             <input type="hidden" name="staff_stars" id="staff_stars" value="0">
             <input type="hidden" name="speed_stars" id="speed_stars" value="0">
