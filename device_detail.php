@@ -80,6 +80,7 @@ $responses = $stmt->fetchAll();
                     <th>Overall</th>
                     <th>Staff</th>
                     <th>Speed</th>
+                    <th>Comment</th>
                 </tr>
             </thead>
             <tbody>
@@ -89,10 +90,11 @@ $responses = $stmt->fetchAll();
                         <td><?= render_stars((float)$r['overall_stars']) ?></td>
                         <td><?= render_stars((float)$r['staff_stars']) ?></td>
                         <td><?= render_stars((float)$r['speed_stars']) ?></td>
+                        <td class="comment-cell"><?= $r['comment'] ? nl2br(e($r['comment'])) : '<span class="empty-inline">—</span>' ?></td>
                     </tr>
                 <?php endforeach; ?>
                 <?php if (empty($responses)): ?>
-                    <tr><td colspan="4" class="empty">No responses yet for this station.</td></tr>
+                    <tr><td colspan="5" class="empty">No responses yet for this station.</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>

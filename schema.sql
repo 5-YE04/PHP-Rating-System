@@ -21,6 +21,7 @@ CREATE TABLE responses (
     overall_stars TINYINT NOT NULL CHECK (overall_stars BETWEEN 1 AND 5),
     staff_stars TINYINT NOT NULL CHECK (staff_stars BETWEEN 1 AND 5),
     speed_stars TINYINT NOT NULL CHECK (speed_stars BETWEEN 1 AND 5),
+    comment TEXT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (device_id) REFERENCES devices(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
