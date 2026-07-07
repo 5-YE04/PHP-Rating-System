@@ -66,40 +66,63 @@ Two tables:
 | `comment` | TEXT, nullable | Optional free-text feedback |
 | `created_at` | TIMESTAMP | Auto-set |
 
-## 🚀 Getting started
+## 🚀 Getting started with XAMPP
 
-### Requirements
-- PHP 7.4+ with the `pdo_mysql` extension
-- MySQL 5.7+ (or MariaDB equivalent)
-- Any web server (Apache/Nginx), or just XAMPP for local development
+The easiest way to run this locally — no separate PHP or MySQL install needed, XAMPP bundles everything.
 
-### Install
+**Requirements:** PHP 7.4+ with `pdo_mysql`, MySQL 5.7+ (or MariaDB) — XAMPP includes both.
 
+### 1. Install XAMPP
+Download from [apachefriends.org](https://www.apachefriends.org) and install it (Windows or Mac).
+
+### 2. Copy the project into `htdocs`
+This is the folder XAMPP serves websites from.
+
+- **Windows:** `C:\xampp\htdocs\rating-system`
+- **Mac:** `/Applications/XAMPP/xamppfiles/htdocs/rating-system`
+
+Either `git clone` directly into that folder, or download/copy the files there:
 ```bash
 git clone https://github.com/yourusername/rating-system.git
 ```
 
-1. Copy the folder into your web server's document root
-   - XAMPP (Windows): `C:\xampp\htdocs\rating-system`
-   - XAMPP (Mac): `/Applications/XAMPP/xamppfiles/htdocs/rating-system`
-2. Create a database and import the schema:
-   ```bash
-   mysql -u root -p -e "CREATE DATABASE rating_system"
-   mysql -u root -p rating_system < schema.sql
-   ```
-   (This also inserts 3 sample devices and a few sample responses so the dashboard isn't empty on first load.)
-3. Edit `config.php` with your database credentials:
-   ```php
-   $DB_HOST = 'localhost';
-   $DB_NAME = 'rating_system';
-   $DB_USER = 'root';
-   $DB_PASS = '';
-   ```
-4. Visit `http://localhost/rating-system/devices.php` to manage stations, or `http://localhost/rating-system/kiosk.php?device=1` to try the survey.
+> **Mac only:** downloaded/dragged-in files sometimes end up without permission for Apache to read them, causing a `Permission denied` / 500 error. If that happens, run:
+> ```bash
+> sudo chmod -R 755 /Applications/XAMPP/xamppfiles/htdocs/rating-system
+> sudo chown -R daemon:admin /Applications/XAMPP/xamppfiles/htdocs/rating-system
+> ```
+
+### 3. Start Apache and MySQL
+Open the **XAMPP Control Panel** (Windows) or **XAMPP app → Manage Servers** (Mac) and click **Start** next to both Apache and MySQL. Both should show a green/running status.
+
+### 4. Create the database
+1. Open `http://localhost/phpmyadmin` in your browser
+2. Click **New** in the left sidebar
+3. Name it `rating_system` → click **Create**
+4. Click into the `rating_system` database → go to the **Import** tab
+5. Click **Choose File**, select `schema.sql` from the project folder → click **Go**
+
+This creates the `devices` and `responses` tables and inserts 3 sample stations plus a few sample ratings, so the dashboard isn't empty on first load.
+
+### 5. Set your database credentials
+Open `config.php` in the project folder and confirm it matches your XAMPP setup (the defaults below usually work out of the box):
+```php
+$DB_HOST = 'localhost';
+$DB_NAME = 'rating_system';
+$DB_USER = 'root';
+$DB_PASS = '';
+```
+
+### 6. Open it in your browser
+- Survey screen: `http://localhost/rating-system/kiosk.php?device=1`
+- Manage stations: `http://localhost/rating-system/devices.php`
+- Analytics dashboard: `http://localhost/rating-system/analysis.php`
+
+If you see a **404 Not Found**, double check the folder is named exactly `rating-system` directly inside `htdocs` (not nested in an extra subfolder), and that you're using one of the URLs above — `index.php` doesn't exist in this project.
 
 ### Upgrading from an older version
 
-If you're pulling updates into an existing install with real data already in it, **don't** re-run `schema.sql` (it drops and recreates tables). Instead run the relevant migration script(s) against your existing database:
+If you're pulling updates into an existing install with real data already in it, **don't** re-run `schema.sql` (it drops and recreates tables). Instead, open `http://localhost/phpmyadmin` → your database → **SQL** tab, and paste in the contents of each migration script that applies to you, or run them from a terminal:
 
 ```bash
 mysql -u root -p rating_system < migrate_add_devices.sql
