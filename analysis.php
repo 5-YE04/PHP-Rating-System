@@ -12,20 +12,26 @@ $overall = $pdo->query("
 ")->fetch();
 
 $by_device = $pdo->query("
-    SELECT device_id,
-           COUNT(*) AS total,
-           COALESCE(AVG(overall_stars), 0) AS avg_overall,
-           COALESCE(AVG(staff_stars), 0) AS avg_staff,
-           COALESCE(AVG(speed_stars), 0) AS avg_speed,
-           COALESCE(AVG((overall_stars + staff_stars + speed_stars) / 3), 0) AS avg_combined
-    FROM responses
-    GROUP BY device_id
-    ORDER BY device_id
+    SELECT d.id AS device_id, d.name AS device_name,
+           COUNT(r.id) AS total,
+           COALESCE(AVG(r.overall_stars), 0) AS avg_overall,
+           COALESCE(AVG(r.staff_stars), 0) AS avg_staff,
+           COALESCE(AVG(r.speed_stars), 0) AS avg_speed,
+           COALESCE(AVG((r.overall_stars + r.staff_stars + r.speed_stars) / 3), 0) AS avg_combined
+    FROM devices d
+    LEFT JOIN responses r ON r.device_id = d.id
+    GROUP BY d.id
+    ORDER BY d.id
 ")->fetchAll();
 
 $recent = $pdo->query("
-    SELECT * FROM responses ORDER BY created_at DESC LIMIT 15
+    SELECT r.*, d.name AS device_name
+    FROM responses r
+    JOIN devices d ON d.id = r.device_id
+    ORDER BY r.created_at DESC LIMIT 15
 ")->fetchAll();
+
+$active_devices = $pdo->query("SELECT id, name FROM devices WHERE active = 1 ORDER BY id")->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -40,9 +46,10 @@ $recent = $pdo->query("
     <header class="site">
         <h1>Feedback <span>Analysis</span></h1>
         <nav class="site">
-            <a href="kiosk.php?device=1">Station 1</a>
-            <a href="kiosk.php?device=2">Station 2</a>
-            <a href="kiosk.php?device=3">Station 3</a>
+            <?php foreach ($active_devices as $ad): ?>
+                <a href="kiosk.php?device=<?= (int)$ad['id'] ?>"><?= e($ad['name']) ?></a>
+            <?php endforeach; ?>
+            <a href="devices.php">Devices</a>
         </nav>
     </header>
 
@@ -75,7 +82,7 @@ $recent = $pdo->query("
         <table class="analysis">
             <thead>
                 <tr>
-                    <th>Station</th>
+                    <th>Device</th>
                     <th>Responses</th>
                     <th>Combined avg</th>
                     <th>Overall service</th>
@@ -86,7 +93,7 @@ $recent = $pdo->query("
             <tbody>
                 <?php foreach ($by_device as $row): ?>
                     <tr>
-                        <td>Station <?= (int)$row['device_id'] ?></td>
+                        <td><a href="device_detail.php?id=<?= (int)$row['device_id'] ?>"><?= e($row['device_name']) ?></a></td>
                         <td><?= (int)$row['total'] ?></td>
                         <td><?= number_format($row['avg_combined'], 2) ?></td>
                         <td><?= number_format($row['avg_overall'], 2) ?></td>
@@ -107,7 +114,7 @@ $recent = $pdo->query("
             <thead>
                 <tr>
                     <th>When</th>
-                    <th>Station</th>
+                    <th>Device</th>
                     <th>Overall</th>
                     <th>Staff</th>
                     <th>Speed</th>
@@ -117,7 +124,7 @@ $recent = $pdo->query("
                 <?php foreach ($recent as $r): ?>
                     <tr>
                         <td><?= date('M j, Y g:ia', strtotime($r['created_at'])) ?></td>
-                        <td>Station <?= (int)$r['device_id'] ?></td>
+                        <td><?= e($r['device_name']) ?></td>
                         <td><?= render_stars((float)$r['overall_stars']) ?></td>
                         <td><?= render_stars((float)$r['staff_stars']) ?></td>
                         <td><?= render_stars((float)$r['speed_stars']) ?></td>
