@@ -93,6 +93,11 @@ $thanks = isset($_GET['thanks']);
                 </div>
             </div>
 
+            <div class="kiosk-question">
+                <div class="kiosk-q-label">Anything you'd like to tell us? <span class="kiosk-optional">(optional)</span></div>
+                <textarea name="comment" class="kiosk-comment" placeholder="Type here..." maxlength="500"></textarea>
+            </div>
+
             <button type="submit" id="submitBtn" class="kiosk-submit" disabled>Submit</button>
         </form>
     </div>

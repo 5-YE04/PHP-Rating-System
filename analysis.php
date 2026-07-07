@@ -118,6 +118,7 @@ $active_devices = $pdo->query("SELECT id, name FROM devices WHERE active = 1 ORD
                     <th>Overall</th>
                     <th>Staff</th>
                     <th>Speed</th>
+                    <th>Comment</th>
                 </tr>
             </thead>
             <tbody>
@@ -128,10 +129,11 @@ $active_devices = $pdo->query("SELECT id, name FROM devices WHERE active = 1 ORD
                         <td><?= render_stars((float)$r['overall_stars']) ?></td>
                         <td><?= render_stars((float)$r['staff_stars']) ?></td>
                         <td><?= render_stars((float)$r['speed_stars']) ?></td>
+                        <td class="comment-cell"><?= $r['comment'] ? nl2br(e($r['comment'])) : '<span class="empty-inline">—</span>' ?></td>
                     </tr>
                 <?php endforeach; ?>
                 <?php if (empty($recent)): ?>
-                    <tr><td colspan="5" class="empty">No responses yet.</td></tr>
+                    <tr><td colspan="6" class="empty">No responses yet.</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>

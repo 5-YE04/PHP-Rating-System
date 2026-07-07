@@ -32,7 +32,11 @@ No more hardcoded "1, 2, or 3" — you can have as many stations as you want, an
 
 ## The 3 questions
 
-Every survey still asks: Overall service, Staff friendliness, Speed of service (1–5 stars each). Edit the wording directly in `kiosk.php` (search `kiosk-q-label`).
+Every survey asks: Overall service, Staff friendliness, Speed of service (1–5 stars each), plus an **optional comment box** underneath. Edit the wording directly in `kiosk.php` (search `kiosk-q-label`).
+
+## Adding the comment column to an existing install
+
+If you already had the kiosk running before comments were added, run `migrate_add_comment.sql` in phpMyAdmin's SQL tab (safe, doesn't touch existing rows — just adds the new column).
 
 ## Setting up an iPad
 
@@ -53,6 +57,7 @@ Every survey still asks: Overall service, Staff friendliness, Speed of service (
 |---|---|
 | `schema.sql` | Fresh-install schema: `devices` + `responses` tables, sample data |
 | `migrate_add_devices.sql` | Adds `devices` table to an existing install, keeps your data |
+| `migrate_add_comment.sql` | Adds the optional `comment` column to an existing install |
 | `config.php` | Database connection — edit credentials here |
 | `helpers.php` | Star-rendering and escaping helpers |
 | `kiosk.php` | Survey screen for one device (`?device=ID`), validated against `devices` |

@@ -10,6 +10,11 @@ $device_id = (int)($_POST['device_id'] ?? 0);
 $overall = (int)($_POST['overall_stars'] ?? 0);
 $staff = (int)($_POST['staff_stars'] ?? 0);
 $speed = (int)($_POST['speed_stars'] ?? 0);
+$comment = trim($_POST['comment'] ?? '');
+if ($comment !== '') {
+    // Cap length server-side as a backstop to the textarea's maxlength.
+    $comment = function_exists('mb_substr') ? mb_substr($comment, 0, 500) : substr($comment, 0, 500);
+}
 
 $stmt = $pdo->prepare("SELECT id FROM devices WHERE id = ? AND active = 1");
 $stmt->execute([$device_id]);
@@ -24,10 +29,10 @@ if (!$valid_device || !$valid_stars($overall) || !$valid_stars($staff) || !$vali
 }
 
 $stmt = $pdo->prepare("
-    INSERT INTO responses (device_id, overall_stars, staff_stars, speed_stars)
-    VALUES (?, ?, ?, ?)
+    INSERT INTO responses (device_id, overall_stars, staff_stars, speed_stars, comment)
+    VALUES (?, ?, ?, ?, ?)
 ");
-$stmt->execute([$device_id, $overall, $staff, $speed]);
+$stmt->execute([$device_id, $overall, $staff, $speed, $comment ?: null]);
 
 header('Location: kiosk.php?device=' . $device_id . '&thanks=1');
 exit;
